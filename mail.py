@@ -1,7 +1,7 @@
 import imaplib
 import email
 import os
-п
+
 
 def get_all_attachments(imap_server, imap_user, imap_password):
 
@@ -23,7 +23,9 @@ def get_all_attachments(imap_server, imap_user, imap_password):
                 file_handler = open(file_path, 'wb')
                 file_handler.write(email_part.get_payload(decode=True))
                 file_handler.close()
+
     # session end
     imap_session.close()
     imap_session.logout()
+    return "Done"
 
