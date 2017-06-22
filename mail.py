@@ -85,6 +85,6 @@ def send_mail(smtp_host, smtp_port, smtp_user, smtp_password,  smtp_sender, smtp
     mail.login(smtp_user, smtp_password)
 
     #sending mail and quit
-    mail.sendmail(smtp_sender, smtp_recievers, message.as_string())
+    mail.send_message(message)
     mail.quit()
 
