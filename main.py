@@ -3,7 +3,7 @@ import mail
 import os
 
 
-files = mail.get_last_attachment(config.server, config.user, config.password)
+files = mail.get_last_attachment(config.IMAP.server, config.IMAP.user, config.IMAP.password)
 
 print("Files in letter: ")
 for file in files:

@@ -1,4 +1,5 @@
 import imaplib
+import smtplib
 import email
 from io import BytesIO as bio
 
@@ -61,3 +62,4 @@ def get_last_attachment(imap_server, imap_user, imap_password):
     imap_session.logout()
 
     return files
+
