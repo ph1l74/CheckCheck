@@ -1,7 +1,9 @@
 import imaplib
 import smtplib
 import email
-from io import BytesIO as bio
+
+from email.mime.text import  MIMEText
+from io import BytesIO
 
 
 messages = {"undefined": "Изображение не распознано, отправьте изображение в лучшем качестве",
@@ -22,7 +24,7 @@ def get_mail_files(message_parts):
     for email_part in email_text.walk():
         file_name = email_part.get_filename()
         if file_name:
-            file_in_bytes = bio(email_part.get_payload(decode=True))
+            file_in_bytes = BytesIO(email_part.get_payload(decode=True))
             files.append((file_name, file_in_bytes))
 
     return files
@@ -73,12 +75,18 @@ def get_last_attachment(imap_server, imap_user, imap_password):
 
 def send_mail(smtp_host, smtp_port, smtp_user, smtp_password,  smtp_sender, smtp_recievers, mail_message):
 
+    print(smtp_host, smtp_port, smtp_user, smtp_sender, smtp_recievers, mail_message)
+
+    message = MIMEText(mail_message)
+    message['Subject'] = 'Python Script'
+    message['From'] = smtp_sender
+    message['To'] = smtp_recievers[0]
+
     # connection to SMTP server
-    mail = smtplib.SMTP(smtp_host, smtp_port)
-    mail.starttls()
+    mail = smtplib.SMTP_SSL(smtp_host, smtp_port)
     mail.login(smtp_user, smtp_password)
 
     #sending mail and quit
-    mail.sendmail(smtp_sender, smtp_recievers, mail_message)
+    mail.sendmail(smtp_sender, smtp_recievers, message.as_string())
     mail.quit()
 
