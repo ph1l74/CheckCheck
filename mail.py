@@ -8,7 +8,9 @@ messages = {"undefined": "Изображение не распознано, от
             "not found": "В письме, которое Вы отправили нет прикрелпенного изображения"}
 
 
-def get_mail_files(message_parts, files):
+def get_mail_files(message_parts):
+
+    files = []
 
     # take only attachments
     email_body = message_parts[0][1]
@@ -23,10 +25,10 @@ def get_mail_files(message_parts, files):
             file_in_bytes = bio(email_part.get_payload(decode=True))
             files.append((file_name, file_in_bytes))
 
+    return files
 
-def get_attachments(imap_server, imap_user, imap_password, mode):
 
-    files = []
+def get_attachments(imap_server, imap_user, imap_password):
 
     # session start
     imap_session = imaplib.IMAP4_SSL(imap_server)
@@ -34,11 +36,10 @@ def get_attachments(imap_server, imap_user, imap_password, mode):
     imap_session.select()
     _, email_stack = imap_session.search(None, 'ALL')
 
-    if mode == 'ALL':
-        # check every mail for attachment
-        for email_id in email_stack[0].split():
-            _, message_parts = imap_session.fetch(email_id, '(RFC822)')
-            get_mail_files(message_parts, files)
+     # check every mail for attachment
+    for email_id in email_stack[0].split():
+        _, message_parts = imap_session.fetch(email_id, '(RFC822)')
+        files = get_mail_files(message_parts)
 
     # session end
     imap_session.close()
@@ -48,8 +49,6 @@ def get_attachments(imap_server, imap_user, imap_password, mode):
 
 
 def get_last_attachment(imap_server, imap_user, imap_password):
-
-    files = []
 
     # session start
     imap_session = imaplib.IMAP4_SSL(imap_server)
@@ -63,7 +62,7 @@ def get_last_attachment(imap_server, imap_user, imap_password):
 
     # read email with last id
     _, message_parts = imap_session.fetch(email_id_latest, '(RFC822)')
-    get_mail_files(message_parts, files)
+    files = get_mail_files(message_parts)
 
     # session end
     imap_session.close()

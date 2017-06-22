@@ -1,8 +1,8 @@
 import os
 import collections
 
-_IMAP = collections.namedtuple('_Imap', ['server', 'user', 'password'])
-_SMTP = collections.namedtuple('_Smtp', ['server', 'port', 'user', 'password', 'sender'])
+_IMAP = collections.namedtuple('_IMAP', ['server', 'user', 'password'])
+_SMTP = collections.namedtuple('_SMTP', ['server', 'port', 'user', 'password', 'sender'])
 
 imap = _IMAP(server=os.environ['IMAP_HOST'],
              user=os.environ['IMAP_USER'],
