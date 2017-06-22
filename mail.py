@@ -8,7 +8,23 @@ messages = {"undefined": "Изображение не распознано, от
             "not found": "В письме, которое Вы отправили нет прикрелпенного изображения"}
 
 
-def get_all_attachments(imap_server, imap_user, imap_password):
+def get_mail_files(message_parts, files):
+
+    # take only attachments
+    email_body = message_parts[0][1]
+
+    # take in bytes
+    email_text = email.message_from_bytes(email_body)
+
+    # write all bytes in list
+    for email_part in email_text.walk():
+        file_name = email_part.get_filename()
+        if file_name:
+            file_in_bytes = bio(email_part.get_payload(decode=True))
+            files.append((file_name, file_in_bytes))
+
+
+def get_attachments(imap_server, imap_user, imap_password, mode):
 
     files = []
 
@@ -18,16 +34,11 @@ def get_all_attachments(imap_server, imap_user, imap_password):
     imap_session.select()
     _, email_stack = imap_session.search(None, 'ALL')
 
-    # check every mail for attachment
-    for email_id in email_stack[0].split():
-        _, message_parts = imap_session.fetch(email_id, '(RFC822)')
-        email_body = message_parts[0][1]
-        email_text = email.message_from_bytes(email_body)
-        for email_part in email_text.walk():
-            file_name = email_part.get_filename()
-            if file_name:
-                file_in_bytes = bio(email_part.get_payload(decode=True))
-                files.append((file_name, file_in_bytes))
+    if mode == 'ALL':
+        # check every mail for attachment
+        for email_id in email_stack[0].split():
+            _, message_parts = imap_session.fetch(email_id, '(RFC822)')
+            get_mail_files(message_parts, files)
 
     # session end
     imap_session.close()
@@ -52,14 +63,7 @@ def get_last_attachment(imap_server, imap_user, imap_password):
 
     # read email with last id
     _, message_parts = imap_session.fetch(email_id_latest, '(RFC822)')
-    email_body = message_parts[0][1]
-    email_text = email.message_from_bytes(email_body)
-
-    for email_part in email_text.walk():
-        file_name = email_part.get_filename()
-        if file_name:
-            file_in_bytes = bio(email_part.get_payload(decode=True))
-            files.append((file_name, file_in_bytes))
+    get_mail_files(message_parts, files)
 
     # session end
     imap_session.close()
