@@ -4,6 +4,10 @@ import email
 from io import BytesIO as bio
 
 
+messages = {"undefined": "Изображение не распознано, отправьте изображение в лучшем качестве",
+            "not found": "В письме, которое Вы отправили нет прикрелпенного изображения"}
+
+
 def get_all_attachments(imap_server, imap_user, imap_password):
 
     files = []
@@ -63,3 +67,18 @@ def get_last_attachment(imap_server, imap_user, imap_password):
 
     return files
 
+
+def send_mail(smtp_host, smtp_port, smtp_user, smtp_password,  smtp_sender, smtp_recievers, mail_message):
+
+    # connection to SMTP server
+    mail = smtplib.SMTP(smtp_host, smtp_port)
+    mail.starttls()
+    mail.login(smtp_user, smtp_password)
+
+    #sending mail
+    mail.sendmail(smtp_sender, smtp_recievers, mail_message)
+
+    # close SMTP-connection
+    mail.quit()
+
+    return True

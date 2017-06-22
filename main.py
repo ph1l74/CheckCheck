@@ -1,11 +1,11 @@
 import config
 import mail
-import os
 
+reciever = ['astakhovfilat@gmail.com']
 
-files = mail.get_last_attachment(config.IMAP.server, config.IMAP.user, config.IMAP.password)
-
-print("Files in letter: ")
-for file in files:
-    print("    {}".format(file[0]))
+if mail.send_mail(config.smtp.server, config.smtp.port, config.smtp.user, config.smtp.password,
+                  config.smtp.sender, reciever, mail.messages['not found']):
+    print('Mail sent')
+else:
+    print('Mail not sent')
 
