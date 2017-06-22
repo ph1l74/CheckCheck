@@ -75,8 +75,6 @@ def get_last_attachment(imap_server, imap_user, imap_password):
 
 def send_mail(smtp_host, smtp_port, smtp_user, smtp_password,  smtp_sender, smtp_recievers, mail_message):
 
-    print(smtp_host, smtp_port, smtp_user, smtp_sender, smtp_recievers, mail_message)
-
     message = MIMEText(mail_message)
     message['Subject'] = 'Python Script'
     message['From'] = smtp_sender
