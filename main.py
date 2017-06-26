@@ -19,4 +19,4 @@ def Check():
     else:
         mail.send_mail(config.smtp, sender, mail.messages['not found'])
 
-
+Check()

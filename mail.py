@@ -1,6 +1,7 @@
 import imaplib
 import smtplib
 import email
+import re
 
 from email.mime.text import  MIMEText
 from io import BytesIO
@@ -25,16 +26,18 @@ def get_mail_files(message_parts):
         file_name = email_part.get_filename()
         if file_name:
             file_in_bytes = BytesIO(email_part.get_payload(decode=True))
-            files.append((file_name, file_in_bytes))
+            files.append(file_in_bytes)
 
     return files
 
 def get_mail_sender(message_parts):
 
+    re_mask = re.compile(r'[a-zA-Z0-9._-]*@[a-zA-Z0-9._-]*')
     email_body = message_parts[0][1]
-    email_text = email.message_from_string(email_body)
-    email_sender = email_text['From']
-    email_sender.get_payload(decode=True)
+    email_text = email.message_from_bytes(email_body)
+    email_sender_text = email_text['From']
+    email_sender = re_mask.findall(email_sender_text)
+
     return email_sender
 
 def get_attachments(imap_object):
@@ -54,8 +57,8 @@ def get_attachments(imap_object):
     for email_id in email_stack[0].split():
         _, message_parts = imap_session.fetch(email_id, '(RFC822)')
         files.extend(get_mail_files(message_parts))
-
-    sender = get_mail_sender()
+        sender = get_mail_sender(message_parts)
+        print(sender)
 
     # session end
     imap_session.close()
@@ -88,14 +91,15 @@ def get_last_attachment(imap_object):
     files = get_mail_files(message_parts)
     file = files[0]
 
-    sender = get_mail_sender()
+    sender = get_mail_sender(message_parts)
+    print(sender)
 
     # session end
     imap_session.close()
     imap_session.logout()
 
     if file:
-        return sender, files
+        return sender, file
     else:
         return sender
 
