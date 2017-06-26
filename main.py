@@ -1,14 +1,22 @@
 import config
 import mail
 import ocr
+import db
 
-# recievers = ['astakhovfilat@gmail.com']
+def Check():
 
+    image = mail.get_last_attachment(config.imap)
+    sender = ""
 
-# mail.send_mail(config.smtp.server, config.smtp.port, config.smtp.user, config.smtp.password,
-#                   config.smtp.sender, recievers, mail.messages['not found'])
+    if image:
+        sender, text = ocr.image_to_text(image)
+        if text:
+            new_reciept = db.Reciept()
+            new_reciept.id = text
+            new_reciept.add()
+        else:
+            mail.send_mail(config.smtp, sender, mail.messages['undefined'])
+    else:
+        mail.send_mail(config.smtp, sender, mail.messages['not found'])
 
-image = mail.get_last_attachment(config.imap.server, config.imap.user, config.imap.password)
-text = ocr.image_to_text(image)
-print(text)
 

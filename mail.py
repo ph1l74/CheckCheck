@@ -29,8 +29,20 @@ def get_mail_files(message_parts):
 
     return files
 
+def get_mail_sender(message_parts):
 
-def get_attachments(imap_server, imap_user, imap_password):
+    email_body = message_parts[0][1]
+    email_text = email.message_from_string(email_body)
+    email_sender = email_text['From']
+    email_sender.get_payload(decode=True)
+    return email_sender
+
+def get_attachments(imap_object):
+
+    files = []
+    imap_server = imap_object.server
+    imap_user = imap_object.user
+    imap_password = imap_object.password
 
     # session start
     imap_session = imaplib.IMAP4_SSL(imap_server)
@@ -41,16 +53,25 @@ def get_attachments(imap_server, imap_user, imap_password):
      # check every mail for attachment
     for email_id in email_stack[0].split():
         _, message_parts = imap_session.fetch(email_id, '(RFC822)')
-        files = get_mail_files(message_parts)
+        files.extend(get_mail_files(message_parts))
+
+    sender = get_mail_sender()
 
     # session end
     imap_session.close()
     imap_session.logout()
 
-    return files
+    if files:
+        return sender, files
+    else:
+        return sender
 
 
-def get_last_attachment(imap_server, imap_user, imap_password):
+def get_last_attachment(imap_object):
+
+    imap_server = imap_object.server
+    imap_user = imap_object.user
+    imap_password = imap_object.password
 
     # session start
     imap_session = imaplib.IMAP4_SSL(imap_server)
@@ -65,15 +86,32 @@ def get_last_attachment(imap_server, imap_user, imap_password):
     # read email with last id
     _, message_parts = imap_session.fetch(email_id_latest, '(RFC822)')
     files = get_mail_files(message_parts)
+    file = files[0]
+
+    sender = get_mail_sender()
 
     # session end
     imap_session.close()
     imap_session.logout()
 
-    return files
+    if file:
+        return sender, files
+    else:
+        return sender
 
 
-def send_mail(smtp_host, smtp_port, smtp_user, smtp_password,  smtp_sender, smtp_recievers, mail_message):
+def send_mail(smtp_object, smtp_reciever, mail_message):
+
+    # load from config
+    smtp_host = smtp_object.smtp_host
+    smtp_port = smtp_object.smtp_port
+    smtp_user = smtp_object.smtp_user
+    smtp_password = smtp_object.smtp_password
+    smtp_sender = smtp_object.smtp_sender
+
+    # make empty tuple and append with smtp_reciver
+    smtp_recievers = []
+    smtp_recievers.append(smtp_reciever)
 
     message = MIMEText(mail_message)
     message['Subject'] = 'Python Script'
@@ -88,3 +126,4 @@ def send_mail(smtp_host, smtp_port, smtp_user, smtp_password,  smtp_sender, smtp
     mail.send_message(message)
     mail.quit()
 
+    return "Mail sent"
