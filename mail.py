@@ -27,8 +27,8 @@ def get_mail_files(message_parts):
         if file_name:
             file_in_bytes = BytesIO(email_part.get_payload(decode=True))
             files.append(file_in_bytes)
-
     return files
+
 
 def get_mail_sender(message_parts):
 
@@ -39,6 +39,7 @@ def get_mail_sender(message_parts):
     email_sender = re_mask.findall(email_sender_text)
 
     return email_sender
+
 
 def get_attachments(imap_object):
 
@@ -58,7 +59,6 @@ def get_attachments(imap_object):
         _, message_parts = imap_session.fetch(email_id, '(RFC822)')
         files.extend(get_mail_files(message_parts))
         sender = get_mail_sender(message_parts)
-        print(sender)
 
     # session end
     imap_session.close()
@@ -92,7 +92,6 @@ def get_last_attachment(imap_object):
     file = files[0]
 
     sender = get_mail_sender(message_parts)
-    print(sender)
 
     # session end
     imap_session.close()

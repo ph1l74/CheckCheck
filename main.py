@@ -3,13 +3,11 @@ import mail
 import ocr
 import db
 
-def Check():
 
-    image = mail.get_last_attachment(config.imap)
-    sender = ""
-
+def check():
+    sender, image = mail.get_last_attachment(config.imap)
     if image:
-        sender, text = ocr.image_to_text(image)
+        text = ocr.image_to_text(image)
         if text:
             new_reciept = db.Reciept()
             new_reciept.id = text
@@ -19,4 +17,4 @@ def Check():
     else:
         mail.send_mail(config.smtp, sender, mail.messages['not found'])
 
-Check()
+check()
