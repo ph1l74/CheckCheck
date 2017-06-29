@@ -41,12 +41,13 @@ def get_mail_sender(message_parts):
     return email_sender
 
 
-def get_attachments(imap_object):
+def get_attachments(imap_object, count=1):
+
+    imap_server = imap_object.server
+    imap_user = imap_object.user
+    imap_password = imap_object.password
 
     files = []
-    imap_server = imap_object.server
-    imap_user = imap_object.user
-    imap_password = imap_object.password
 
     # session start
     imap_session = imaplib.IMAP4_SSL(imap_server)
@@ -54,63 +55,31 @@ def get_attachments(imap_object):
     imap_session.select()
     _, email_stack = imap_session.search(None, 'ALL')
 
-     # check every mail for attachment
-    for email_id in email_stack[0].split():
-        _, message_parts = imap_session.fetch(email_id, '(RFC822)')
-        files.extend(get_mail_files(message_parts))
-        sender = get_mail_sender(message_parts)
-
-    # session end
-    imap_session.close()
-    imap_session.logout()
-
-    if files:
-        return sender, files
-    else:
-        return sender
-
-
-def get_last_attachment(imap_object):
-
-    imap_server = imap_object.server
-    imap_user = imap_object.user
-    imap_password = imap_object.password
-
-    # session start
-    imap_session = imaplib.IMAP4_SSL(imap_server)
-    _, account_details = imap_session.login(imap_user, imap_password)
-    imap_session.select()
-    _, email_stack = imap_session.search(None, 'ALL')
 
     # get list of emails id and choose the last one
     email_id_list = email_stack[0].split()
-    email_id_latest = email_id_list[-1]
 
-    # read email with last id
-    _, message_parts = imap_session.fetch(email_id_latest, '(RFC822)')
-    files = get_mail_files(message_parts)
-    file = files[0]
-
-    sender = get_mail_sender(message_parts)
+    for i in range(count, 0, -1):
+        _, message_parts = imap_session.fetch(email_id_list[-i], '(RFC822)')
+        message_files = get_mail_files(message_parts)
+        sender = get_mail_sender(message_parts)
+        files.append([sender, message_files])
 
     # session end
     imap_session.close()
     imap_session.logout()
 
-    if file:
-        return sender, file
-    else:
-        return sender
+    return files
 
 
 def send_mail(smtp_object, smtp_reciever, mail_message):
 
     # load from config
-    smtp_host = smtp_object.smtp_host
-    smtp_port = smtp_object.smtp_port
-    smtp_user = smtp_object.smtp_user
-    smtp_password = smtp_object.smtp_password
-    smtp_sender = smtp_object.smtp_sender
+    smtp_host = smtp_object.server
+    smtp_port = smtp_object.port
+    smtp_user = smtp_object.user
+    smtp_password = smtp_object.password
+    smtp_sender = smtp_object.sender
 
     # make empty tuple and append with smtp_reciver
     smtp_recievers = []
